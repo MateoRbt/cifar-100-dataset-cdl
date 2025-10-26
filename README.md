@@ -84,11 +84,11 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 | 51     | 0.8182    | 0.7200 | 0.7660   | 100     |
 | 52     | 0.7000    | 0.7000 | 0.7000   | 100     |
 | 53     | 0.6121    | 0.7100 | 0.6574   | 100     |
-|        |           |        |          |         |
+|--------|-----------|--------|----------|---------|
 |accuracy|           |        | 0.7835   | 5400    |
 |macro avg| 0.7861   | 0.7835 | 0.7838   | 5400    |
 |weighted avg| 0.7861| 0.7835 | 0.7838   | 5400    |
-*
+
 ## Confusion Pair Analysis Report
 
 | True        | Pred     | MisRate  | Precision(Pred) | Recall(True) | F1(True) | F1(Pred) |
