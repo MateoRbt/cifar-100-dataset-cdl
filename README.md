@@ -27,7 +27,7 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 
 ## Results & Visuals
 
-- **Classification Report**
+## Classification Report
 | Class | Precision | Recall | F1-score | Support |
 |-------|-----------|--------|----------|---------|
 | 0     | 0.9500    | 0.9500 | 0.9500   | 100     |
@@ -90,7 +90,8 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 |macro avg| 0.7861   | 0.7835 | 0.7838   | 5400    |
 |weighted avg| 0.7861| 0.7835 | 0.7838   | 5400    |
 *
-- **Confusion Pair Analysis Report**
+## Confusion Pair Analysis Report
+
 | True        | Pred     | MisRate  | Precision(Pred) | Recall(True) | F1(True) | F1(Pred) |
 |-------------|----------|----------|-----------------|--------------|----------|----------|
 | maple_tree  | oak_tree | 0.2400   | 0.595           | 0.610        | 0.619    | 0.639    |
@@ -98,7 +99,8 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 | girl        | baby     | 0.1400   | 0.698           | 0.510        | 0.573    | 0.718    |
 | man         | woman    | 0.1400   | 0.612           | 0.720        | 0.702    | 0.657    |
 | mouse       | shrew    | 0.1400   | 0.577           | 0.640        | 0.624    | 0.607    |
-- **UMAP Visualizations**
+
+## UMAP Visualizations
 
 ![girl vs baby](https://imgur.com/a/Fmrp7lR)
 ![girl vs woman](https://imgur.com/6UDne63)
@@ -107,7 +109,7 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 ![mouse vs shrew](https://imgur.com/a/xtN1x2T)
 
 
-- **Sample Images**
+## Sample Images
     ![Samples](https://imgur.com/a/qkogqfZ)
 
 ---
