@@ -89,6 +89,7 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 |macro avg| 0.7861   | 0.7835 | 0.7838   | 5400    |
 |weighted avg| 0.7861| 0.7835 | 0.7838   | 5400    |
 
+
 ## Confusion Pair Analysis Report
 
 | True        | Pred     | MisRate  | Precision(Pred) | Recall(True) | F1(True) | F1(Pred) |
@@ -101,15 +102,15 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 
 ## UMAP Visualizations
 
-![girl vs baby](https://imgur.com/a/Fmrp7lR)
-![girl vs woman](https://imgur.com/6UDne63)
-![man vs woman](https://imgur.com/a/BCvo1g3)
-![maple vs oak](https://imgur.com/a/eqwe-yLiPWzn)
-![mouse vs shrew](https://imgur.com/a/xtN1x2T)
+![girl vs baby](docs/girlvsbaby.png)
+![girl vs woman](docs/girlvswoman.png)
+![man vs woman](docs/manvswoman.png)
+![maple vs oak](docs/maplevsoak.png)
+![mouse vs shrew](docs/mousevsshrew.png)
 
 
 ## Sample Images
-![Samples](https://imgur.com/a/qkogqfZ)
+![Samples](docs/output.png)
 
 ---
 
