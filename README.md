@@ -1,5 +1,3 @@
-
-
 # CIFAR-100 Overlap Class Analysis
 
 This repository provides a workflow for identifying and analyzing overlapping classes in the CIFAR-100 dataset using DINO features and a simple classifier.
@@ -102,10 +100,19 @@ Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights syste
 
 ## UMAP Visualizations
 
+### Girl vs Baby
 ![girl vs baby](docs/girlvsbaby.png)
+
+### Girl vs Woman
 ![girl vs woman](docs/girlvswoman.png)
+
+### Man vs Woman
 ![man vs woman](docs/manvswoman.png)
+
+### Maple vs Oak
 ![maple vs oak](docs/maplevsoak.png)
+
+### Mouse vs Shrew
 ![mouse vs shrew](docs/mousevsshrew.png)
 
 
