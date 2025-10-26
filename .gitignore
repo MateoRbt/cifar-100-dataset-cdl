@@ -7,6 +7,15 @@
 # Ignore extracted features and intermediate outputs
 /feature_extraction/
 
+#ignore the test set folder
+/test_set/
+
+#ignore new_dataset_features folder
+/new_dataset_features/
+
+/umap/
+/samples/
+
 # Ignore model checkpoints (if saved locally)
 /checkpoints/
 *.ckpt

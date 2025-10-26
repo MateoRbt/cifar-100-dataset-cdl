@@ -1,115 +1,122 @@
-# cifar-100-dataset-cdl
-
-This repository contains a Jupyter Notebook (`notebookk.ipynb`) and helper folders used to create a focused CIFAR-100 dataset variation based on DINO (self-supervised) feature similarity. The notebook extracts DINO features for CIFAR-100 images, identifies "overlapping" classes by cosine similarity of class centroids, and writes subsetted training and test images (with CSV metadata) to a new dataset folder structure.
-
-## High-level overview
-
-- Load CIFAR-100 (train + test). Two transforms are used:
-  - `transform_basic` — simple ToTensor() used when saving images in their original format.
-  - `transform_features` — resize/center-crop/normalize used to compute DINO features.
-- Use a pre-trained DINO Vision Transformer (via `timm`) to extract the CLS token features for every image.
-- Compute per-class centroids (mean feature vector) and a pairwise cosine similarity matrix between class centroids.
-- Mark classes as "overlapping" when their centroid similarity exceeds a threshold (default 0.9).
-- For overlapping classes, save original train images into `new_dataset/{DATASET}_{class_name}/` and test images into `new_dataset/test_set/{DATASET}_{class_name}/`.
-- Save CSV metadata files describing every saved image (`metadata_train.csv` and `test_set/metadata_test.csv`).
-
-## What the notebook does (step-by-step)
-
-1. Imports and configuration
-	- Detects device (CPU/GPU).
-	- Creates output directories: `feature_extraction/features/`, `new_dataset/` and `new_dataset/test_set/`.
-	- Sets model name (`vit_small_patch16_224.dino`), feature dimensions (384), batch size and a `SIMILARITY_THRESHOLD` (default 0.9).
-
-2. Data loading and transforms
-	- Defines `transform_basic` (for saving original images) and `transform_features` (for DINO inputs).
-	- Loads CIFAR-100 train and test splits into `original_datasets` and creates a concatenated dataset for feature extraction.
-
-3. DINO model setup
-	- Loads the specified pre-trained DINO model with `timm` and wraps it in a small extractor that returns the CLS token feature vector.
-
-4. Feature extraction
-	- If not already present, extracts features for all images in the concatenated CIFAR-100 dataset using the DINO extractor and saves them to `feature_extraction/features/{DATASET}_X_all_dino.pt` and labels to `{DATASET}_y_all.pt`.
-
-5. Overlap identification
-	- Loads saved features and labels.
-	- Computes centroids (mean feature per class).
-	- Builds a cosine similarity matrix between centroids and flags class pairs exceeding the similarity threshold. The union of classes appearing in those pairs becomes the `overlapping_classes` set.
-
-6. Saving training and test images
-	- Iterates the CIFAR-100 train split and saves images whose label is in the overlapping set into `new_dataset/{DATASET}_{class_name}/`.
-	- Iterates the CIFAR-100 test split and saves images into `new_dataset/test_set/{DATASET}_{class_name}/`.
-	- Generates two CSV files with metadata about saved images:
-	  - `new_dataset/metadata_train.csv`
-	  - `new_dataset/test_set/metadata_test.csv`
-
-7. Final summary 
-	- The notebook prints counts and absolute paths of the new dataset directories and saved-image totals.
 
 
-## Files and folders created
+# CIFAR-100 Overlap Class Analysis
 
-- `feature_extraction/features/{DATASET}_X_all_dino.pt` — Torch tensor of all extracted DINO features.
-- `feature_extraction/features/{DATASET}_y_all.pt` — Torch tensor of labels corresponding to features.
-- `new_dataset/{DATASET}_{class_name}/` — PNG images saved from the original training split for overlapping classes.
-- `new_dataset/test_set/{DATASET}_{class_name}/` — PNG images saved from the original test split for overlapping classes.
-- `new_dataset/metadata_train.csv` — metadata for training images saved.
-- `new_dataset/test_set/metadata_test.csv` — metadata for test images saved.
+This repository provides a workflow for identifying and analyzing overlapping classes in the CIFAR-100 dataset using DINO features and a simple classifier.
 
-Each metadata CSV contains rows with these columns (as saved by the notebook):
-- `new_class_name` — the new folder name used for the class (e.g. `CIFAR100_apple`).
-- `original_dataset` — dataset short name (e.g. `CIFAR100`).
-- `original_class_name` — human-readable class label.
-- `original_label_idx` — class numeric index (0..99).
-- `original_index_in_split` — the original dataset index within the train/test split.
-- `split` — `train` or `test`.
-- `saved_path` — absolute or relative filesystem path to the PNG file written.
+## Workflow
 
-## Requirements / prerequisites
+1. **Overlap Detection**
+   - Extract DINO features for all CIFAR-100 images
+   - Compute class centroids and cosine similarities
+   - Identify overlapping classes (high similarity)
+   - Save images and metadata for these classes
 
-- Python 3.8+ (tested with recent PyTorch/timm versions).
-- PyTorch and torchvision (GPU optional but recommended for feature extraction speed).
-- timm (for the DINO model checkpoint), scikit-learn, pandas, tqdm, pillow, numpy, umap-learn (if you run UMAP visualization).
+2. **Classification & Analysis**
+   - Create train/val/test splits for overlapping classes
+   - Train a simple MLP classifier
+   - Generate classification report and confusion matrix
+   - Analyze significant confusion pairs
+   - Visualize results (UMAP, confusion matrix, sample images)
 
-You can install the common dependencies (example):
+## Confusion Pair Analysis
 
-```powershell
-python -m pip install torch torchvision timm scikit-learn pandas tqdm pillow numpy umap-learn
-```
+Significant confusion pairs are detected by thresholding the normalized confusion matrix:
+$$T = \mu + k \cdot \sigma$$
+Pairs with $C_{ij} \geq T$ are flagged for further review. This highlights systematic misclassifications between visually or semantically similar classes.
 
-Note: match the `torch` install to your CUDA version following the official instructions if you plan to use a GPU.
+## Results & Visuals
 
-## How to run
+- **Classification Report**
+| Class | Precision | Recall | F1-score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.9500    | 0.9500 | 0.9500   | 100     |
+| 1     | 0.6981    | 0.7400 | 0.7184   | 100     |
+| 2     | 0.8750    | 0.8400 | 0.8571   | 100     |
+| 3     | 0.7091    | 0.7800 | 0.7429   | 100     |
+| 4     | 0.8776    | 0.8600 | 0.8687   | 100     |
+| 5     | 0.9062    | 0.8700 | 0.8878   | 100     |
+| 6     | 0.9167    | 0.8800 | 0.8980   | 100     |
+| 7     | 0.5882    | 0.6000 | 0.5941   | 100     |
+| 8     | 0.8370    | 0.7700 | 0.8021   | 100     |
+| 9     | 0.8936    | 0.8400 | 0.8660   | 100     |
+| 10    | 0.8519    | 0.9200 | 0.8846   | 100     |
+| 11    | 0.8505    | 0.9100 | 0.8792   | 100     |
+| 12    | 0.8485    | 0.8400 | 0.8442   | 100     |
+| 13    | 0.8351    | 0.8100 | 0.8223   | 100     |
+| 14    | 0.8144    | 0.7900 | 0.8020   | 100     |
+| 15    | 0.7476    | 0.7700 | 0.7586   | 100     |
+| 16    | 0.9175    | 0.8900 | 0.9036   | 100     |
+| 17    | 0.7449    | 0.7300 | 0.7374   | 100     |
+| 18    | 0.8495    | 0.7900 | 0.8187   | 100     |
+| 19    | 0.8478    | 0.7800 | 0.8125   | 100     |
+| 20    | 0.6538    | 0.5100 | 0.5730   | 100     |
+| 21    | 0.8889    | 0.8800 | 0.8844   | 100     |
+| 22    | 0.8247    | 0.8000 | 0.8122   | 100     |
+| 23    | 0.8252    | 0.8500 | 0.8374   | 100     |
+| 24    | 0.7757    | 0.8300 | 0.8019   | 100     |
+| 25    | 0.7835    | 0.7600 | 0.7716   | 100     |
+| 26    | 0.6857    | 0.7200 | 0.7024   | 100     |
+| 27    | 0.6289    | 0.6100 | 0.6193   | 100     |
+| 28    | 0.6095    | 0.6400 | 0.6244   | 100     |
+| 29    | 0.5948    | 0.6900 | 0.6389   | 100     |
+| 30    | 0.8411    | 0.9000 | 0.8696   | 100     |
+| 31    | 0.6019    | 0.6200 | 0.6108   | 100     |
+| 32    | 0.8462    | 0.8800 | 0.8627   | 100     |
+| 33    | 0.9406    | 0.9500 | 0.9453   | 100     |
+| 34    | 0.8152    | 0.7500 | 0.7812   | 100     |
+| 35    | 0.7547    | 0.8000 | 0.7767   | 100     |
+| 36    | 0.7905    | 0.8300 | 0.8098   | 100     |
+| 37    | 0.8462    | 0.6600 | 0.7416   | 100     |
+| 38    | 0.8137    | 0.8300 | 0.8218   | 100     |
+| 39    | 0.8557    | 0.8300 | 0.8426   | 100     |
+| 40    | 0.7573    | 0.7800 | 0.7685   | 100     |
+| 41    | 0.8351    | 0.8100 | 0.8223   | 100     |
+| 42    | 0.6495    | 0.6300 | 0.6396   | 100     |
+| 43    | 0.7064    | 0.7700 | 0.7368   | 100     |
+| 44    | 0.5766    | 0.6400 | 0.6066   | 100     |
+| 45    | 0.8542    | 0.8200 | 0.8367   | 100     |
+| 46    | 0.7843    | 0.8000 | 0.7921   | 100     |
+| 47    | 0.8173    | 0.8500 | 0.8333   | 100     |
+| 48    | 0.7982    | 0.8700 | 0.8325   | 100     |
+| 49    | 0.7579    | 0.7200 | 0.7385   | 100     |
+| 50    | 0.8495    | 0.7900 | 0.8187   | 100     |
+| 51    | 0.8182    | 0.7200 | 0.7660   | 100     |
+| 52    | 0.7000    | 0.7000 | 0.7000   | 100     |
+| 53    | 0.6121    | 0.7100 | 0.6574   | 100     |
 
-1. Open `notebookk.ipynb` in Jupyter / VS Code and run the cells in order.
-2. The notebook is already structured to skip expensive recomputation when feature files exist. If you re-run from scratch, delete the feature files in `feature_extraction/features/` to force re-extraction.
+|        |           |        |          |         |
+|accuracy|           |        | 0.7835   | 5400    |
+|macro avg| 0.7861   | 0.7835 | 0.7838   | 5400    |
+|weighted avg| 0.7861| 0.7835 | 0.7838   | 5400    |
+*
+- **Confusion Pair Analysis Report**
+| True        | Pred     | MisRate  | Precision(Pred) | Recall(True) | F1(True) | F1(Pred) |
+|-------------|----------|----------|-----------------|--------------|----------|----------|
+| maple_tree  | oak_tree | 0.2400   | 0.595           | 0.610        | 0.619    | 0.639    |
+| girl        | woman    | 0.1600   | 0.612           | 0.510        | 0.573    | 0.657    |
+| girl        | baby     | 0.1400   | 0.698           | 0.510        | 0.573    | 0.718    |
+| man         | woman    | 0.1400   | 0.612           | 0.720        | 0.702    | 0.657    |
+| mouse       | shrew    | 0.1400   | 0.577           | 0.640        | 0.624    | 0.607    |
+- **UMAP Visualizations**
 
-Quick outline of key cells:
-- Imports & configuration — set device, paths and hyperparameters.
-- Data loading — download/load CIFAR-100 and prepare transforms.
-- DINO model setup — loads the pre-trained model via `timm`.
-- Feature extraction — compute and save features/labels (large memory / GPU usage possible).
-- Overlap identification — computes centroids and selects overlapping classes.
-- Save subsets — writes images and metadata CSVs for train and test.
-- Final summary — prints counts and paths.
-
-## Configuration tips and caveats
-
-- Similarity threshold: The default 0.9 is strict — lower it if you want more classes considered overlapping.
-- Batch size and device: feature extraction uses a configurable `BATCH_SIZE_FEATURES` and will be much slower on CPU.
-- Disk space: saving full PNGs for many classes will increase disk usage. Monitor free space when extracting large subsets.
-- Determinism: The notebook uses deterministic centroid computation (mean of features) but ensure RNG seeds if you need exact reproducibility across runs.
+![girl vs baby](https://imgur.com/a/Fmrp7lR)
+![girl vs woman](https://imgur.com/6UDne63)
+![man vs woman](https://imgur.com/a/BCvo1g3)
+![maple vs oak](https://imgur.com/a/eqwe-yLiPWzn)
+![mouse vs shrew](https://imgur.com/a/xtN1x2T)
 
 
-## Next steps / extensions
-
-- Filter images by per-sample similarity to a class centroid (instead of class-level centroids) to create tighter subsets.
-- Use alternative backbones or embeddings (other DINO checkpoints, supervised backbones).
-- Export a dataset manifest or create a PyTorch ImageFolder-friendly layout with a label mapping file.
-
-## License & attribution
-
-This repository and notebook are provided for research/educational purposes. The DINO model is used via `timm` and is subject to its licensing. CIFAR-100 is a standard academic dataset; check and follow its terms of use when redistributing derived datasets.
+- **Sample Images**
+    ![Samples](https://imgur.com/a/qkogqfZ)
 
 ---
 
-Generated from `notebookk.ipynb` markdown cells and code comments.
+## Notebooks
+
+- `Find_Overlap_Classes.ipynb`: Overlap detection & dataset creation
+- `Filter_classes.ipynb`: Training, evaluation, and visualization
+
+---
+
+*Paste your visuals and tables above for a complete summary.*
